@@ -25,10 +25,16 @@
     - "sites-available"
     - "sites-enabled"
 
+- name: Check if /etc/nginx/nginx.conf exists
+  stat: path=/etc/nginx/nginx.conf
+  register: nginx_conf_exists
+
 - name: Copy the nginx configuration file 
   template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  when: (create_nginx_conf is defined and create_nginx_conf|lower == "true") or nginx_conf_exists is not defined
   notify: 
    - restart nginx
+ 
 
 - name: Copy the nginx default configuration file 
   template: src=default.conf.j2 dest=/etc/nginx/conf.d/default.conf

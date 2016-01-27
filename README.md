@@ -1,4 +1,4 @@
-nginx
+Ansible role - Nginx server
 =====
 
 This role installs and configures the nginx web server. The user can specify
@@ -16,6 +16,10 @@ Role Variables
 
 The variables that can be passed to this role and a brief description about
 them are as follows.
+
+    # Force creation of nginx.conf. Normally, nginx.conf is only written if it does not exist.
+    # If this parameter is true, it will override the current nginx.conf
+    create_nginx_conf: true 
 
     # The max clients allowed
     nginx_max_clients: 512                                
@@ -59,9 +63,11 @@ configured:
     - hosts: all
       roles:
       - {role: nginx,
-         nginx_http_params: { sendfile: "on",
-                              access_log: "/var/log/nginx/access.log"},
-                              nginx_sites: none }
+            create_nginx_conf: true,
+            nginx_http_params: { sendfile: "on",
+                                               access_log: "/var/log/nginx/access.log"},
+            nginx_sites: none 
+          }
 
 
 2) Install nginx with different HTTP directives than previous example, but no
@@ -70,9 +76,11 @@ sites configured.
     - hosts: all
       roles:
       - {role: nginx,
-         nginx_http_params: { tcp_nodelay: "on",
-                              error_log: "/var/log/nginx/error.log"}, 
-                              nginx_sites: none }
+            create_nginx_conf: true,
+            nginx_http_params: { tcp_nodelay: "on",
+                                               error_log: "/var/log/nginx/error.log"}, 
+            nginx_sites: none 
+          }
 
 Note: Please make sure the HTTP directives passed are valid, as this role
 won't check for the validity of the directives. See the nginx documentation
@@ -84,10 +92,11 @@ for details.
 
       roles:
       - role: nginx,
+        create_nginx_conf: true
         nginx_http_params:
-          sendfile: "on"
-          access_log: "/var/log/nginx/access.log"
-          nginx_sites:
+           sendfile: "on"
+           access_log: "/var/log/nginx/access.log"
+        nginx_sites:
           - server:
              file_name: bar
              listen: 8080
@@ -98,7 +107,7 @@ Note: Each site added is represented by list of hashes, and the configurations
 generated are populated in `/etc/nginx/sites-available/` and have corresponding
 symlinks from `/etc/nginx/sites-enabled/`
 
-The file name for the specific site configurtaion is specified in the hash
+The file name for the specific site configuration is specified in the hash
 with the key "file_name", any valid server directives can be added to hash.
 For location directive add the key "location" suffixed by a unique number, the
 value for the location is hash, please make sure they are valid location
@@ -110,9 +119,10 @@ directives.
     - hosts: all
       roles:
         - role: nginx
+          create_nginx_conf: true
           nginx_http_params:
-            sendfile: "on"
-            access_log: "/var/log/nginx/access.log"
+              sendfile: "on"
+              access_log: "/var/log/nginx/access.log"
           nginx_sites:
            - server:
               file_name: foo
@@ -129,6 +139,30 @@ directives.
               location1: {name: /, try_files: "$uri $uri/ /index.html"}
               location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
 
+5) Add virtual hosts to existing Nginx install (and install optionally Nginx if not installed yet)
+
+    ---
+    - hosts: all
+      roles:
+        - role: nginx
+          nginx_sites:
+           - server:
+              file_name: foo
+              listen: 8080
+              server_name: localhost
+              root: "/tmp/site1"
+              location1: {name: /, try_files: "$uri $uri/ /index.html"}
+              location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
+           - server:
+              file_name: bar
+              listen: 9090
+              server_name: ansible
+              root: "/tmp/site2"
+              location1: {name: /, try_files: "$uri $uri/ /index.html"}
+              location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
+
+Note: without the parameter create_nginx_conf: true the role will not overwrite nginx.conf. This option allows to install virtual hosts to an existing nginx installation based on this role, i.e. installation scripts for different services using this role.
+
 Dependencies
 ------------
 
@@ -141,6 +175,9 @@ BSD
 
 Author Information
 ------------------
+
+Repleo, Amstelveen, Holland -- www.repleo.nl  
+Jeroen Arnoldus (jeroen@repleo.nl)
 
 Benno Joy
 
