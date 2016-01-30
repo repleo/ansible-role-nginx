@@ -1,10 +1,5 @@
 #{{ ansible_managed }}
-{% if ansible_os_family == 'RedHat' %} 
-user              nginx;
-{% endif %}
-{% if ansible_os_family == 'Debian' %} 
-user              www-data;
-{% endif %}
+user              {{ nginx_uid }};
 
 worker_processes  {{ ansible_processor_count }};
 pid        /var/run/nginx.pid;
@@ -26,10 +21,17 @@ http {
 {% for k,v in nginx_http_params.iteritems() %}
         {{ k }}  {{ v }};
 {% endfor %}
-
+		sendfile on;
+		tcp_nopush on;
+		tcp_nodelay on;
         gzip on;
         gzip_disable "msie6";
-
+		keepalive_timeout 65;
+		types_hash_max_size 2048;
+		server_names_hash_bucket_size 64;
         include /etc/nginx/conf.d/*.conf;
         include /etc/nginx/sites-enabled/*;
 }
+
+
+

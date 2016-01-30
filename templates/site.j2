@@ -1,20 +1,34 @@
+#{{ ansible_managed }}
 server {
 
 {% if nginx_separate_logs_per_site == True %}
-	access_log {{ nginx_log_dir}}/{{ item.server.server_name}}-{{ nginx_access_log_name}};
-	error_log {{ nginx_log_dir}}/{{ item.server.server_name}}-{{ nginx_error_log_name}};
+	access_log {{ nginx_log_dir}}/{{ item.server_name}}-{{ nginx_access_log_name}};
+	error_log {{ nginx_log_dir}}/{{ item.server_name}}-{{ nginx_error_log_name}};
 {% endif %}
 
-{% for k,v in item.server.iteritems() %}
-{% if k.find('location') == -1 and k != 'file_name' %}
+{% if item.ssl is defined %}
+listen {{ item.listen }} ssl;
+ssl_certificate {{ nginx_ssl_dir }}/{{ item.ssl.certificate }};
+ssl_certificate_key {{ nginx_ssl_dir }}/{{ item.ssl.key }};
+# only access via secure https
+add_header Strict-Transport-Security max-age=31536000;
+# Not allowed to be framed, i.e <iframe> (clickjacking attacks)
+add_header X-Frame-Options DENY;
+{% else %}
+listen {{ item.listen }};
+{% endif %}
+
+
+{% for k,v in item.iteritems() %}
+{% if k.find('locations') == -1 and k != 'file_name' and k != 'listen' and k != 'ssl' %}
 {{ k }} {{ v }};
 {% endif %}
 {% endfor %} 
 
-{% for k,v in item.server.iteritems() if k.find('location') != -1 %}
-  location {{ v.name }} {
-{% for x,y in v.iteritems() if x != 'name' %} 
-      {{ x }} {{ y }};
+{% for location in item.locations %}
+  location {{ location.name }} {
+{% for line in location.lines %} 
+      {{ line }};
 {% endfor %}
   }
 {% endfor %}

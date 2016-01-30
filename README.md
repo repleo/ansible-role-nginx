@@ -38,21 +38,34 @@ them are as follows.
     # A list of hashs that define the servers for nginx,
     # as with http parameters. Any valid server parameters
     # can be defined here.
-    nginx_sites:                                         
-     - server:                                           
-        file_name: foo
-        listen: 8080
-        server_name: localhost
-        root: "/tmp/site1"
-        location1: {name: /, try_files: "$uri $uri/ /index.html"}
-        location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
-     - server:
-        file_name: bar
-        listen: 9090
-        server_name: ansible
-        root: "/tmp/site2"
-        location1: {name: /, try_files: "$uri $uri/ /index.html"}
-        location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
+    nginx_sites:
+    - file_name: foo
+      listen: 8080
+      server_name: localhost
+      root: "/tmp/site1"
+      ssl:
+        local_keystore_dir: "{{ playbook_dir }}/files/"
+        key: "ssl.key"
+        certificate: "ssl_chain.pem"
+      locations: 
+        - name: /
+          lines:
+            - "try_files: $uri $uri/ /index.html"
+        - name: /images/
+          lines:
+            - "try_files: $uri $uri/ /index.html"
+    - file_name: bar
+      listen: 9090
+      server_name: ansible
+      root: "/tmp/site2"
+      locations: 
+        - name: /
+          lines:
+            - "try_files: $uri $uri/ /index.html"
+        - name: /images/
+          lines:
+            - "try_files: $uri $uri/ /index.html"
+               
 
 Examples
 ========
@@ -66,7 +79,7 @@ configured:
             create_nginx_conf: true,
             nginx_http_params: { sendfile: "on",
                                                access_log: "/var/log/nginx/access.log"},
-            nginx_sites: none 
+            nginx_sites: [] 
           }
 
 
@@ -79,7 +92,7 @@ sites configured.
             create_nginx_conf: true,
             nginx_http_params: { tcp_nodelay: "on",
                                                error_log: "/var/log/nginx/error.log"}, 
-            nginx_sites: none 
+            nginx_sites: []
           }
 
 Note: Please make sure the HTTP directives passed are valid, as this role
@@ -91,77 +104,138 @@ for details.
     - hosts: all
 
       roles:
-      - role: nginx,
-        create_nginx_conf: true
-        nginx_http_params:
-           sendfile: "on"
-           access_log: "/var/log/nginx/access.log"
-        nginx_sites:
-          - server:
-             file_name: bar
-             listen: 8080
-             location1: {name: "/", try_files: "$uri $uri/ /index.html"}
-             location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
-
+      - { role: nginx,
+          create_nginx_conf: true,
+          nginx_http_params: { tcp_nodelay: "on",
+                                           error_log: "/var/log/nginx/error.log"},
+          nginx_sites: [
+            - file_name: bar,
+              server_name: localhost,
+              listen: 8080,
+              locations: [
+                - name: /,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+                - name: /images/,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+		   ]
+		 ] }            
+ 
 Note: Each site added is represented by list of hashes, and the configurations
 generated are populated in `/etc/nginx/sites-available/` and have corresponding
 symlinks from `/etc/nginx/sites-enabled/`
 
 The file name for the specific site configuration is specified in the hash
 with the key "file_name", any valid server directives can be added to hash.
-For location directive add the key "location" suffixed by a unique number, the
-value for the location is hash, please make sure they are valid location
-directives.
+
 
 4) Install Nginx and add 2 sites (different method)
 
-    ---
     - hosts: all
+
       roles:
-        - role: nginx
-          create_nginx_conf: true
-          nginx_http_params:
-              sendfile: "on"
-              access_log: "/var/log/nginx/access.log"
-          nginx_sites:
-           - server:
-              file_name: foo
-              listen: 8080
-              server_name: localhost
-              root: "/tmp/site1"
-              location1: {name: /, try_files: "$uri $uri/ /index.html"}
-              location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
-           - server:
-              file_name: bar
-              listen: 9090
-              server_name: ansible
-              root: "/tmp/site2"
-              location1: {name: /, try_files: "$uri $uri/ /index.html"}
-              location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
+      - { role: nginx,
+          create_nginx_conf: true,
+          nginx_http_params: { tcp_nodelay: "on",
+                                           error_log: "/var/log/nginx/error.log"},
+          nginx_sites: [
+            - file_name: bar,
+              server_name: localhost,
+              listen: 8080,
+              locations: [
+                - name: /,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+                - name: /images/,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+		 ] }
+            - file_name: bar,
+              server_name: ansible,
+              listen: 9090,
+              root: "/tmp/site2",
+              locations: [
+                - name: /,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+                - name: /images/,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+		 ] }  
+
 
 5) Add virtual hosts to existing Nginx install (and install optionally Nginx if not installed yet)
 
-    ---
     - hosts: all
+
       roles:
-        - role: nginx
-          nginx_sites:
-           - server:
-              file_name: foo
-              listen: 8080
-              server_name: localhost
-              root: "/tmp/site1"
-              location1: {name: /, try_files: "$uri $uri/ /index.html"}
-              location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
-           - server:
-              file_name: bar
-              listen: 9090
-              server_name: ansible
-              root: "/tmp/site2"
-              location1: {name: /, try_files: "$uri $uri/ /index.html"}
-              location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
+      - { role: nginx,
+          nginx_sites: [
+            - file_name: bar,
+              server_name: localhost,
+              listen: 8080,
+              locations: [
+                - name: /,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+                - name: /images/,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+		 ] }
+            - file_name: bar,
+              server_name: ansible,
+              listen: 9090,
+              root: "/tmp/site2",
+              locations: [
+                - name: /,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+                - name: /images/,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+		  ]
+		] }  
 
 Note: without the parameter create_nginx_conf: true the role will not overwrite nginx.conf. This option allows to install virtual hosts to an existing nginx installation based on this role, i.e. installation scripts for different services using this role.
+
+6) Example of an HTTPS server including installation of keys
+
+    - hosts: all
+
+      roles:
+      - { role: nginx,
+          nginx_sites: [
+            - file_name: bar,
+              server_name: localhost,
+              listen: 8080,
+              ssl: {
+                  local_keystore_dir: "{{ playbook_dir }}/files/",
+                  key: localhost.key,
+                  certificate: localhost_chain.pem              },
+              locations: [
+                - name: /,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+                - name: /images/,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+		  ] 
+		] }  
+
+Note: the ssl key and cert should be available in the calling project in the directory files.
 
 Dependencies
 ------------
@@ -178,6 +252,8 @@ Author Information
 
 Repleo, Amstelveen, Holland -- www.repleo.nl  
 Jeroen Arnoldus (jeroen@repleo.nl)
+
+Original version by:
 
 Benno Joy
 

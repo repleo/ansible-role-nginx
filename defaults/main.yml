@@ -1,5 +1,7 @@
 ---
 
+nginx_create_nginx_conf: false
+
 nginx_max_clients: 512
 
 nginx_http_params:
@@ -14,17 +16,29 @@ nginx_error_log_name: "error.log"
 nginx_separate_logs_per_site: False
 
 nginx_sites:
- - server:
-    file_name: foo
+  - file_name: foo
     listen: 8080
     server_name: localhost
     root: "/tmp/site1"
-    location1: {name: /, try_files: "$uri $uri/ /index.html"}
-    location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
- - server:
-    file_name: bar
+    ssl:
+      local_keystore_dir: "{{ playbook_dir }}/files/"
+      key: "ssl.key"
+      certificate: "ssl_chain.pem"
+    locations: 
+      - name: /
+        lines:
+          - "try_files: $uri $uri/ /index.html"
+      - name: /images/
+        lines:
+          - "try_files: $uri $uri/ /index.html"
+  - file_name: bar
     listen: 9090
     server_name: ansible
     root: "/tmp/site2"
-    location1: {name: /, try_files: "$uri $uri/ /index.html"}
-    location2: {name: /images/, try_files: "$uri $uri/ /index.html"}
+    locations: 
+      - name: /
+        lines:
+          - "try_files: $uri $uri/ /index.html"
+      - name: /images/
+        lines:
+          - "try_files: $uri $uri/ /index.html"
