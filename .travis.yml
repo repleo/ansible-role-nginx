@@ -13,8 +13,10 @@ addons:
 
 install:
   # Install ansible
-  - pip install git+https://github.com/ansible/ansible.git
-
+  # Build does not work with ansible 2.1
+  #- pip install git+https://github.com/ansible/ansible.git
+  -  pip install https://github.com/ansible/ansible/archive/stable-1.9.zip
+  
   # Check ansible version
   - ansible --version
 
@@ -35,6 +37,8 @@ script:
     # && (echo 'Idempotence test: pass' && exit 0)
     # || (echo 'Idempotence test: fail' && exit 1)
 
+
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
+
 
