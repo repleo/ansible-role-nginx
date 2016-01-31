@@ -1,5 +1,6 @@
 Ansible role - Nginx server
 =====
+[![Build Status](https://travis-ci.org/repleo/ansible-role-nginx.svg?branch=master)](https://travis-ci.org/repleo/ansible-role-nginx)
 
 This role installs and configures the nginx web server. The user can specify
 any http configuration parameters they wish to apply their site. Any number of
