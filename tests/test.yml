@@ -2,8 +2,8 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - { ansible-role-nginx
-	  nginx_create_nginx_conf: true,
+    - { role: ansible-role-nginx,
+          nginx_create_nginx_conf: true,
           nginx_http_params: { 
           },
           nginx_sites: []
