@@ -13,8 +13,7 @@ addons:
 
 install:
   # Install ansible
-  # Build does not work with ansible 2.1
-  -  pip install https://github.com/ansible/ansible/archive/stable-1.9.zip
+  - pip install git+https://github.com/ansible/ansible.git
   
   # Check ansible version
   - ansible --version
