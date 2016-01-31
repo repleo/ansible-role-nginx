@@ -20,7 +20,11 @@ galaxy_info:
       - quantal
       - raring
       - saucy
-  categories:
+  galaxy_tags:
    - web
+   - server
+   - nginx
+   - https
+   - http
 dependencies: []
   
