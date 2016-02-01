@@ -6,7 +6,7 @@ server {
 	error_log {{ nginx_log_dir}}/{{ item.server_name}}-{{ nginx_error_log_name}};
 {% endif %}
 
-{% if item.ssl is defined %}
+{% if item.ssl is defined and item.ssl.key != None %}
 listen {{ item.listen }} ssl;
 ssl_certificate {{ nginx_ssl_dir }}/{{ item.ssl.certificate }};
 ssl_certificate_key {{ nginx_ssl_dir }}/{{ item.ssl.key }};
