@@ -1,6 +1,7 @@
 Ansible role - Nginx server
 =====
 [![Build Status](https://travis-ci.org/repleo/ansible-role-nginx.svg?branch=master)](https://travis-ci.org/repleo/ansible-role-nginx)
+[![Ansible Galaxy](http://img.shields.io/badge/galaxy-repleo.nginx-660198.svg?style=flat)](https://galaxy.ansible.com/repleo/nginx)
 
 This role installs and configures the nginx web server. The user can specify
 any http configuration parameters they wish to apply their site. Any number of
@@ -223,7 +224,8 @@ Note: without the parameter create_nginx_conf: true the role will not overwrite 
               ssl: {
                   local_keystore_dir: "{{ playbook_dir }}/files/",
                   key: localhost.key,
-                  certificate: localhost_chain.pem              },
+                  certificate: localhost_chain.pem
+              },
               locations: [
                 - name: /,
                   lines: [
@@ -237,6 +239,21 @@ Note: without the parameter create_nginx_conf: true the role will not overwrite 
 		] }  
 
 Note: the ssl key and cert should be available in the calling project in the directory files.
+
+Handlers
+--------
+The NGINX role provides two handlers:
+- reload nginx
+- restart nginx
+
+Reloading the nginx configuration offers you the ability to update your webserver without downtime. However, it might occur old processes are not updated. Restart will ensure that the webserver is killed and restarted again and will cause (a short) downtime.
+
+Example:
+
+	- name: template configuration file
+	  template: src=template.j2 dest=/etc/foo.conf
+	  notify:
+	     - restart nginx
 
 Dependencies
 ------------
