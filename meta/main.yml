@@ -27,5 +27,4 @@ galaxy_info:
    - nginx
    - https
    - http
-dependencies:
-    - {role: jaywink.letsencrypt, }
+dependencies: []
