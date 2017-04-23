@@ -8,6 +8,9 @@ server {
 
 {% if item.ssl is defined and item.ssl.key != None %}
 listen {{ item.listen }} ssl;
+{% if not item.ipv4_only is defined %}
+listen [::]:{{ item.listen }} ssl;
+{% endif %}
 ssl_certificate {{ nginx_ssl_dir }}/{{ item.ssl.certificate }};
 ssl_certificate_key {{ nginx_ssl_dir }}/{{ item.ssl.key }};
 # only access via secure https
@@ -16,6 +19,9 @@ add_header Strict-Transport-Security max-age=31536000;
 add_header X-Frame-Options DENY;
 {% else %}
 listen {{ item.listen }};
+{% if not item.ipv4_only is defined %}
+listen [::]:{{ item.listen }};
+{% endif %}
 {% endif %}
 
 
