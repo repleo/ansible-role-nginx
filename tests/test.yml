@@ -6,7 +6,41 @@
           nginx_create_nginx_conf: true,
           nginx_http_params: { 
           },
-          nginx_sites: []
+          nginx_sites: [{
+                  file_name: test,
+                  listen: 80,
+                  server_name: localhost,                  
+                  locations: [{
+                      name: /static,
+                      lines: [
+                        "root /srv/www/static",
+                        "include mime.types"
+                      ]
+                    },
+                   {
+                      name: /,
+                      lines: [
+                        "root /srv/www/dynamic"
+                      ]
+                    },
+                    {
+                      name: /wrong/url,
+                      lines: [
+                        "return 404"
+                      ]
+                    }]
+                  }, {
+                  file_name: test2,
+                  listen: 81,
+                  server_name: localhost,
+                  ipv4_only: true,                  
+                  locations: [{
+                      name: /,
+                      lines: [
+                        "return 404"
+                      ]
+                    }]
+                }]
       }
 
       
