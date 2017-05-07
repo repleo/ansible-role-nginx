@@ -8,7 +8,7 @@ server {
 
 {% if item.ssl is defined and item.ssl.key != None %}
 listen {{ item.listen }} ssl;
-{% if not item.ipv4_only %}
+{% if not (item.ipv4_only is defined and item.ipv4_only == True) %}
 listen [::]:{{ item.listen }} ssl;
 {% endif %}
 ssl_certificate {{ nginx_ssl_dir }}/{{ item.ssl.certificate }};
@@ -19,14 +19,14 @@ add_header Strict-Transport-Security max-age=31536000;
 add_header X-Frame-Options DENY;
 {% else %}
 listen {{ item.listen }};
-{% if not item.ipv4_only %}
+{% if not (item.ipv4_only is defined and item.ipv4_only == True) %}
 listen [::]:{{ item.listen }};
 {% endif %}
 {% endif %}
 
 
 {% for k,v in item.iteritems() %}
-{% if k.find('locations') == -1 and k != 'file_name' and k != 'listen' and k != 'ssl' %}
+{% if k.find('locations') == -1 and k != 'file_name' and k != 'listen' and k != 'ssl' and k != 'ipv4_only' %}
 {{ k }} {{ v }};
 {% endif %}
 {% endfor %} 
