@@ -32,6 +32,12 @@
   environment: '{{ env }}'
   when: ansible_os_family == "Debian"
 
+- name: Install the certbot packages
+  apt: name=certbot state=present update_cache=yes
+  default_release: jessie-backports
+  environment: '{{ env }}'
+  when: ansible_os_family == "Debian"
+
 - name: Create the directories for site specific configurations and ssl keys
   file: path=/etc/nginx/{{ item }} state=directory owner=root group=root mode=0755
   with_items:
