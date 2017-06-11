@@ -14,6 +14,7 @@ nginx_log_dir: "/var/log/nginx"
 nginx_access_log_name: "access.log"
 nginx_error_log_name: "error.log"
 nginx_separate_logs_per_site: False
+nginx_ssl_dir: "/etc/nginx/ssl"
 
 nginx_sites:
   - file_name: foo
@@ -21,10 +22,10 @@ nginx_sites:
     server_name: localhost
     root: "/tmp/site1"
     ssl:
-      local_keystore_dir: "{{ playbook_dir }}/files/"
+      supplier: "local"
       key: "ssl.key"
       certificate: "ssl_chain.pem"
-    locations: 
+    locations:
       - name: /
         lines:
           - "try_files: $uri $uri/ /index.html"
@@ -32,10 +33,23 @@ nginx_sites:
         lines:
           - "try_files: $uri $uri/ /index.html"
   - file_name: bar
+      listen: 8888
+      server_name: bar
+      root: "/tmp/site1"
+      ssl:
+        supplier: "letsencrypt"
+      locations:
+        - name: /
+          lines:
+            - "try_files: $uri $uri/ /index.html"
+        - name: /images/
+          lines:
+            - "try_files: $uri $uri/ /index.html"
+  - file_name: foobar
     listen: 9090
     server_name: ansible
     root: "/tmp/site2"
-    locations: 
+    locations:
       - name: /
         lines:
           - "try_files: $uri $uri/ /index.html"
