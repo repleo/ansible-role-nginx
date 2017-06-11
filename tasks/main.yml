@@ -1,5 +1,5 @@
 
-    
+
 - name: set var nginx user account for Redhat
   set_fact:
     nginx_uid: "nginx"
@@ -17,16 +17,16 @@
   yum: name=libselinux-python state=present
   when: ansible_os_family == "RedHat"
 
-- name: Copy the epel packages 
+- name: Copy the epel packages
   copy: src=epel.repo dest=/etc/yum.repos.d/epel_ansible.repo
   when: ansible_os_family == "RedHat"
 
-- name: Install the nginx packages 
+- name: Install the nginx packages
   yum: name={{ item }} state=present
   with_items: "{{redhat_pkg}}"
   when: ansible_os_family == "RedHat"
 
-- name: Install the nginx packages 
+- name: Install the nginx packages
   apt: name={{ item }} state=present update_cache=yes
   with_items: "{{ubuntu_pkg}}"
   environment: '{{ env }}'
@@ -40,16 +40,15 @@
     - "ssl"
 
 
- 
+
 - name: Check if /etc/nginx/nginx.conf exists
   stat: path=/etc/nginx/nginx.conf
   register: nginx_conf_exists
 
-
-- name: Copy the nginx configuration file 
+- name: Copy the nginx configuration file
   template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
   when: (nginx_create_nginx_conf is defined and nginx_create_nginx_conf|lower == "true") or nginx_conf_exists is not defined
-  notify: 
+  notify:
    - restart nginx
 
 
@@ -58,45 +57,65 @@
   copy: src={{ item.ssl.local_keystore_dir }}/{{item.ssl.key }} dest={{ nginx_ssl_dir }}/{{ item.ssl.key }}  owner={{ nginx_uid }} group={{ nginx_gid }} mode=400 backup=no
   with_items:
     - "{{nginx_sites }}"
-  when: 
-    - item.ssl is defined 
+  when:
+    - item.ssl is defined
     - item.ssl != None
     - item.ssl.key is defined
     - item.ssl.key != None
-    
+    - item.ssl.supplier == "local"
+
 - name: Copy SSL certificates
   copy: src={{ item.ssl.local_keystore_dir }}/{{item.ssl.certificate }} dest={{ nginx_ssl_dir }}/{{ item.ssl.certificate }}  owner={{ nginx_uid }} group={{ nginx_gid }} mode=644 backup=no
   with_items:
     - "{{nginx_sites }}"
-  when: 
-    - item.ssl is defined 
+  when:
+    - item.ssl is defined
     - item.ssl != None
     - item.ssl.certificate is defined
     - item.ssl.certificate != None
-    
-- name: Copy the nginx default configuration file 
+    - item.ssl.supplier == "local"
+
+- name: Copy the nginx default configuration file
   template: src=default.conf.j2 dest=/etc/nginx/conf.d/default.conf
 
-- name: Copy the nginx default site configuration file 
+- name: Copy the nginx default site configuration file
   template: src=default.j2 dest=/etc/nginx/sites-available/default
 
 - name: Create the link for site enabled specific configurations
-  file: path=/etc/nginx/sites-enabled/default state=link src=/etc/nginx/sites-available/default 
+  file: path=/etc/nginx/sites-enabled/default state=link src=/etc/nginx/sites-available/default
+
+- name: check if letsencrypt is used
+
+
+- name: configure certbot webroot plugin
+  command: certbot certonly --webroot -w {{item.root }} -d www.{{item.server_name }} -d {{item.server_name }}
+  with_items: "{{nginx_sites}}"
+  when:
+    - item.ssl.supplier == "letsencrypt"
+
+#- name: create symlink to letsencrypt keys
+#  with_items: "{{nginx_sites}}"
+
+#- name: create symlink to letsencrypt certs
+#  with_items: "{{nginx_sites}}"
+
+#- name: check renew of certificates
+#  certbot renew --dry-run
+#  when_letsencrypt:
+
 
 
 - name: Create the configurations for sites
   template: src=site.j2 dest=/etc/nginx/sites-available/{{ item.file_name }}
   with_items: "{{nginx_sites}}"
 
-    
+
 - name: Create the links to enable site configurations
   file: path=/etc/nginx/sites-enabled/{{ item.file_name }} state=link src=/etc/nginx/sites-available/{{ item.file_name }}
   with_items: "{{nginx_sites}}"
-  notify: 
+  notify:
    - reload nginx
 
 
 - name: start the nginx service
   service: name=nginx state=started enabled=yes
-
-

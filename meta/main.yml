@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Jeroen Arnoldus
-  description: Ansible role for installing nginx, including support for SSL and virtual host deployments
+  description: Ansible role for installing nginx, including support for SSL, letsencrypt and virtual host deployments
   company: Repleo, Amstelveen, Holland
   license: BSD
   min_ansible_version: 1.4
