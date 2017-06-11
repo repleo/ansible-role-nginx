@@ -33,18 +33,18 @@ nginx_sites:
         lines:
           - "try_files: $uri $uri/ /index.html"
   - file_name: bar
-      listen: 8888
-      server_name: bar
-      root: "/tmp/site1"
-      ssl:
-        supplier: "letsencrypt"
-      locations:
-        - name: /
-          lines:
-            - "try_files: $uri $uri/ /index.html"
-        - name: /images/
-          lines:
-            - "try_files: $uri $uri/ /index.html"
+    listen: 8888
+    server_name: bar
+    root: "/tmp/site1"
+    ssl:
+      supplier: "letsencrypt"
+    locations:
+      - name: /
+        lines:
+          - "try_files: $uri $uri/ /index.html"
+      - name: /images/
+        lines:
+          - "try_files: $uri $uri/ /index.html"
   - file_name: foobar
     listen: 9090
     server_name: ansible
