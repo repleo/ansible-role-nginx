@@ -4,6 +4,7 @@ env:
  RUNLEVEL: 1
 
 redhat_pkg:
+  - certbot
   - nginx
 
 ubuntu_pkg:

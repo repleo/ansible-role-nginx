@@ -84,9 +84,6 @@
 - name: Create the link for site enabled specific configurations
   file: path=/etc/nginx/sites-enabled/default state=link src=/etc/nginx/sites-available/default
 
-- name: check if letsencrypt is used
-
-
 - name: configure certbot webroot plugin
   command: certbot certonly --webroot -w {{item.root }} -d www.{{item.server_name }} -d {{item.server_name }}
   with_items: "{{nginx_sites}}"
