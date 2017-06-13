@@ -13,9 +13,9 @@ nginx_http_params:
 nginx_log_dir: "/var/log/nginx"
 nginx_access_log_name: "access.log"
 nginx_error_log_name: "error.log"
-nginx_separate_logs_per_site: False
+nginx_separate_logs_per_site: True
 nginx_ssl_dir: "/etc/nginx/ssl"
-
+letsencrypt_ssl_dir: "/etc/letsencrypt/live/"
 nginx_sites:
   - file_name: foo
     listen: 8080
@@ -32,6 +32,8 @@ nginx_sites:
       - name: /images/
         lines:
           - "try_files: $uri $uri/ /index.html"
+    lines:
+      - "return 301 https://$http_host$request_uri;"
   - file_name: bar
     listen: 8888
     server_name: bar

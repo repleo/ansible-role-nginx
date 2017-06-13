@@ -21,7 +21,7 @@ them are as follows.
 
     # Force creation of nginx.conf. Normally, nginx.conf is only written if it does not exist.
     # If this parameter is true, it will override the current nginx.conf
-    create_nginx_conf: true 
+    create_nginx_conf: true
 
     # The max clients allowed
     nginx_max_clients: 512                                
@@ -46,28 +46,31 @@ them are as follows.
       server_name: localhost
       root: "/tmp/site1"
       ssl:
+        supplier: "local"
         local_keystore_dir: "{{ playbook_dir }}/files/"
         key: "ssl.key"
         certificate: "ssl_chain.pem"
-      locations: 
+      locations:
         - name: /
           lines:
             - "try_files: $uri $uri/ /index.html"
         - name: /images/
           lines:
             - "try_files: $uri $uri/ /index.html"
+      lines:
+        - "return 301 https://$http_host$request_uri;"
     - file_name: bar
       listen: 9090
       server_name: ansible
       root: "/tmp/site2"
-      locations: 
+      locations:
         - name: /
           lines:
             - "try_files: $uri $uri/ /index.html"
         - name: /images/
           lines:
             - "try_files: $uri $uri/ /index.html"
-               
+
 
 Examples
 ========
@@ -81,7 +84,7 @@ configured:
             create_nginx_conf: true,
             nginx_http_params: { sendfile: "on",
                                                access_log: "/var/log/nginx/access.log"},
-            nginx_sites: [] 
+            nginx_sites: []
           }
 
 
@@ -93,7 +96,7 @@ sites configured.
       - {role: nginx,
             create_nginx_conf: true,
             nginx_http_params: { tcp_nodelay: "on",
-                                               error_log: "/var/log/nginx/error.log"}, 
+                                               error_log: "/var/log/nginx/error.log"},
             nginx_sites: []
           }
 
@@ -125,7 +128,7 @@ for details.
 		     ]
 		   ]
 		 ] }            
- 
+
 Note: Each site added is represented by list of hashes, and the configurations
 generated are populated in `/etc/nginx/sites-available/` and have corresponding
 symlinks from `/etc/nginx/sites-enabled/`
@@ -222,6 +225,7 @@ Note: without the parameter create_nginx_conf: true the role will not overwrite 
               server_name: localhost,
               listen: 8080,
               ssl: {
+                  supplier: "local"
                   local_keystore_dir: "{{ playbook_dir }}/files/",
                   key: localhost.key,
                   certificate: localhost_chain.pem
@@ -235,10 +239,39 @@ Note: without the parameter create_nginx_conf: true the role will not overwrite 
                   lines: [
                     - "try_files: $uri $uri/ /index.html"
 		     ]
-		  ] 
+		  ]
 		] }  
 
 Note: the ssl key and cert should be available in the calling project in the directory files.
+
+7) Example of an HTTPS server including installation of letsencrypt keys
+
+    - hosts: all
+
+      roles:
+      - { role: nginx,
+          nginx_sites: [
+            - file_name: bar,
+              server_name: example.com www.example.com,
+              listen: 8080,
+              ssl: {
+                supplier: "letsencrypt",
+                domains: [
+                  "example.com",
+                  "www.example.com"
+                ]
+              },
+              locations: [
+                - name: /,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+                - name: /images/,
+                  lines: [
+                    - "try_files: $uri $uri/ /index.html"
+		     ]
+		  ]
+		] }  
 
 Handlers
 --------
@@ -274,5 +307,3 @@ Jeroen Arnoldus (jeroen@repleo.nl)
 Original version by:
 
 Benno Joy
-
-

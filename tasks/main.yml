@@ -89,10 +89,22 @@
 - name: Create the link for site enabled specific configurations
   file: path=/etc/nginx/sites-enabled/default state=link src=/etc/nginx/sites-available/default
 
-- name: configure certbot webroot plugin
-  command: certbot certonly --webroot -w {{item.root }} -d www.{{item.server_name }} -d {{item.server_name }}
+- name: Create the configurations for sites
+  template: src=site.j2 dest=/etc/nginx/sites-available/{{ item.file_name }}
   with_items: "{{nginx_sites}}"
+
+- name: create directory /srv/www/letsencrypt/
+  file: path=/srv/www/letsencrypt/{{item.file_name}} state=directory
+  with_items:
+    - "{{nginx_sites }}"
+
+- name: configure certbot webroot plugin
+  command: certbot certonly -n --expand --webroot -w "/srv/www/letsencrypt/{{item.file_name}}" -d "{{item.ssl.domains|join(',')}}" --cert-name "{{ item.file_name }}"
+  with_items:
+    - "{{nginx_sites}}"
   when:
+    - item.ssl is defined
+    - item.ssl != None
     - item.ssl.supplier == "letsencrypt"
 
 #- name: create symlink to letsencrypt keys
@@ -107,9 +119,6 @@
 
 
 
-- name: Create the configurations for sites
-  template: src=site.j2 dest=/etc/nginx/sites-available/{{ item.file_name }}
-  with_items: "{{nginx_sites}}"
 
 
 - name: Create the links to enable site configurations

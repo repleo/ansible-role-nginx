@@ -2,17 +2,26 @@
 server {
 
 {% if nginx_separate_logs_per_site == True %}
-	access_log {{ nginx_log_dir}}/{{ item.server_name}}-{{ nginx_access_log_name}};
-	error_log {{ nginx_log_dir}}/{{ item.server_name}}-{{ nginx_error_log_name}};
+	access_log {{ nginx_log_dir}}/{{ item.file_name}}-{{ nginx_access_log_name}};
+	error_log {{ nginx_log_dir}}/{{ item.file_name}}-{{ nginx_error_log_name}};
 {% endif %}
 
-{% if item.ssl is defined and item.ssl.key != None %}
+{% if item.ssl is defined and item.ssl != None %}
 listen {{ item.listen }} ssl;
 {% if not (item.ipv4_only is defined and item.ipv4_only == False) %}
 listen [::]:{{ item.listen }} ssl;
 {% endif %}
+{% if item.ssl.supplier == "local"%}
 ssl_certificate {{ nginx_ssl_dir }}/{{ item.ssl.certificate }};
 ssl_certificate_key {{ nginx_ssl_dir }}/{{ item.ssl.key }};
+{% elif item.ssl.supplier == "letsencrypt"%}
+ssl_certificate {{ letsencrypt_ssl_dir }}/{{ item.file_name }}/fullchain.pem;
+ssl_certificate_key {{ letsencrypt_ssl_dir }}/{{ item.file_name }}/privkey.pem;
+location /letsencrypt {
+	root /srv/www/letsencrypt;
+	include mime.types;
+}
+{% endif %}
 # only access via secure https
 add_header Strict-Transport-Security max-age=31536000;
 # Not allowed to be framed, i.e <iframe> (clickjacking attacks)
@@ -29,14 +38,18 @@ listen [::]:{{ item.listen }};
 {% if k.find('locations') == -1 and k != 'file_name' and k != 'listen' and k != 'ssl' and k != 'ipv4_only' %}
 {{ k }} {{ v }};
 {% endif %}
-{% endfor %} 
+{% endfor %}
 
+{% if item.locations is defined and item.locations != None %}
 {% for location in item.locations %}
   location {{ location.name }} {
-{% for line in location.lines %} 
+{% if location.lines is defined and location.lines != None %}
+{% for line in location.lines %}
       {{ line }};
 {% endfor %}
+{% endif %}
   }
 {% endfor %}
-}
+{% endif %}
 
+}
