@@ -11,6 +11,9 @@ addons:
     packages:
     - python-pip
 
+before_install:
+    - sudo add-apt-repository -y 'deb http://ftp.debian.org/ jessie-backports main'
+
 install:
   # Install ansible
   - pip install git+https://github.com/ansible/ansible.git
