@@ -13,6 +13,7 @@ addons:
 
 before_install:
     - sudo add-apt-repository -y 'deb http://ftp.debian.org/ jessie-backports main'
+    - sudo apt-get update
 
 install:
   # Install ansible
