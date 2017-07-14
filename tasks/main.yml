@@ -107,19 +107,6 @@
     - item.ssl != None
     - item.ssl.supplier == "letsencrypt"
 
-#- name: create symlink to letsencrypt keys
-#  with_items: "{{nginx_sites}}"
-
-#- name: create symlink to letsencrypt certs
-#  with_items: "{{nginx_sites}}"
-
-#- name: check renew of certificates
-#  certbot renew --dry-run
-#  when_letsencrypt:
-
-
-
-
 
 - name: Create the links to enable site configurations
   file: path=/etc/nginx/sites-enabled/{{ item.file_name }} state=link src=/etc/nginx/sites-available/{{ item.file_name }}

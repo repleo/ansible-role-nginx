@@ -1,6 +1,9 @@
 # Change Log
 The nginx ansible change history
 
+## [1.2.1] - Release 2017-07-13
+* removed redundant lines
+
 ## [1.2.0] - Release 2017-06-13
 * Added on the fly cert generation with letsencrypt
 
