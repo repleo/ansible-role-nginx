@@ -1,6 +1,9 @@
 # Change Log
 The nginx ansible change history
 
+## [1.2.2] - Release 2017-07-13
+* made letsencrypt work during install process
+
 ## [1.2.1] - Release 2017-07-13
 * removed redundant lines
 
