@@ -1,6 +1,9 @@
 # Change Log
 The nginx ansible change history
 
+## [1.2.3] - Release 2017-07-15
+* Added special process to fetch letsencrypt cert and added cronjob for renewal certificates
+
 ## [1.2.2] - Release 2017-07-13
 * made letsencrypt work during install process
 

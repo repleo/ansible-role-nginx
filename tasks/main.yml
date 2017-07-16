@@ -44,8 +44,6 @@
     - "sites-enabled"
     - "ssl"
 
-
-
 - name: Check if /etc/nginx/nginx.conf exists
   stat: path=/etc/nginx/nginx.conf
   register: nginx_conf_exists
@@ -143,6 +141,8 @@
   notify:
    - reload nginx
 
-
 - name: start the nginx service
   service: name=nginx state=started enabled=yes
+
+- name: Add cronjob for letsencrypt bot
+  cron: name="Update letsencrypt certs" minute="15" hour="3" job="/usr/bin/certbot renew --quiet --renew-hook \"/usr/sbin/service nginx reload\""

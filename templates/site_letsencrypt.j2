@@ -5,8 +5,9 @@ listen 80;
 listen [::]:80;
 server_name {{ item.server_name }};
 
-location /letsencrypt {
-	root /srv/www/letsencrypt;
+location ~ / {
+	root /srv/www/letsencrypt/{{ item.file_name }};
+	allow all;
 	include mime.types;
 }
 

@@ -17,8 +17,8 @@ ssl_certificate_key {{ nginx_ssl_dir }}/{{ item.ssl.key }};
 {% elif item.ssl.supplier == "letsencrypt"%}
 ssl_certificate {{ letsencrypt_ssl_dir }}/{{ item.file_name }}/fullchain.pem;
 ssl_certificate_key {{ letsencrypt_ssl_dir }}/{{ item.file_name }}/privkey.pem;
-location /letsencrypt {
-	root /srv/www/letsencrypt;
+location /.well-known {
+	root /srv/www/letsencrypt/{{ item.file_name }}/.well-known;
 	include mime.types;
 }
 {% endif %}
