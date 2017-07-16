@@ -250,28 +250,35 @@ Note: the ssl key and cert should be available in the calling project in the dir
 
       roles:
       - { role: nginx,
+          nginx_separate_logs_per_site: true,
           nginx_sites: [
             - file_name: bar,
-              server_name: example.com www.example.com,
-              listen: 8080,
+              server_name: "example.com www.example.com",
+              listen: 80,
+              return: "301 https://$http_host$request_uri"
+
+            - file_name: bar.ssl,
+              server_name: "example.com www.example.com",
+              listen: 443,
               ssl: {
-                supplier: "letsencrypt",
-                domains: [
-                  "example.com",
-                  "www.example.com"
-                ]
+                  supplier: "letsencrypt",
+                  domains: [
+                    "example.com",
+                    "www.example.com"
+                  ]
               },
               locations: [
                 - name: /,
                   lines: [
                     - "try_files: $uri $uri/ /index.html"
-		     ]
+		              ]
                 - name: /images/,
                   lines: [
                     - "try_files: $uri $uri/ /index.html"
-		     ]
-		  ]
-		] }  
+		              ]
+		          ]
+		      ]
+        }  
 
 Handlers
 --------
