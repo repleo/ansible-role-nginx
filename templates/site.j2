@@ -49,8 +49,6 @@ ssl_certificate_key {{ letsencrypt_ssl_dir }}/{{ item.file_name }}/privkey.pem;
 {% endif %}
 # only access via secure https
 add_header Strict-Transport-Security max-age=31536000;
-# Not allowed to be framed, i.e <iframe> (clickjacking attacks)
-add_header X-Frame-Options DENY;
 {% else %}
 listen {{ item.listen }};
 {% if not (item.ipv4_only is defined and item.ipv4_only == False) %}
