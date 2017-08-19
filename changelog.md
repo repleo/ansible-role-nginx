@@ -1,7 +1,10 @@
 # Change Log
 The nginx ansible change history
 
-## [1.3.0] - Release 2017-0819
+## [1.3.1] - Release 2017-08-19
+* Removed IFrame Deny rule
+
+## [1.3.0] - Release 2017-08-19
 * Fixed letsencrypt well-known config
 * added generation of https redirect
 
