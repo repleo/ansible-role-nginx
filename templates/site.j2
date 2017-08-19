@@ -1,4 +1,32 @@
 #{{ ansible_managed }}
+{% if item.ssl is defined and item.ssl != None and item.ssl.generate_redirect is defined and item.ssl.generate_redirect %}
+server {
+
+{% if nginx_separate_logs_per_site == True %}
+	access_log {{ nginx_log_dir}}/{{ item.file_name}}-{{ nginx_access_log_name}};
+	error_log {{ nginx_log_dir}}/{{ item.file_name}}-{{ nginx_error_log_name}};
+{% endif %}
+
+listen 80;
+{% if not (item.ipv4_only is defined and item.ipv4_only == False) %}
+listen [::]:80;
+{% endif %}
+
+server_name {{ item.server_name }};
+
+{% if item.ssl.supplier == "letsencrypt"%}
+	location /.well-known {
+		root /srv/www/letsencrypt/{{ item.file_name }}/;
+		include mime.types;
+	}
+{% endif %}
+
+	location / {
+	  return 301 https://$http_host$request_uri;
+	}
+}
+{% endif %}
+
 server {
 
 {% if nginx_separate_logs_per_site == True %}
@@ -17,10 +45,7 @@ ssl_certificate_key {{ nginx_ssl_dir }}/{{ item.ssl.key }};
 {% elif item.ssl.supplier == "letsencrypt"%}
 ssl_certificate {{ letsencrypt_ssl_dir }}/{{ item.file_name }}/fullchain.pem;
 ssl_certificate_key {{ letsencrypt_ssl_dir }}/{{ item.file_name }}/privkey.pem;
-location /.well-known {
-	root /srv/www/letsencrypt/{{ item.file_name }}/.well-known;
-	include mime.types;
-}
+
 {% endif %}
 # only access via secure https
 add_header Strict-Transport-Security max-age=31536000;

@@ -1,6 +1,10 @@
 # Change Log
 The nginx ansible change history
 
+## [1.3.0] - Release 2017-0819
+* Fixed letsencrypt well-known config
+* added generation of https redirect
+
 ## [1.2.3] - Release 2017-07-15
 * Added special process to fetch letsencrypt cert and added cronjob for renewal certificates
 

@@ -40,6 +40,7 @@ nginx_sites:
     root: "/tmp/site1"
     ssl:
       supplier: "letsencrypt"
+      generate_redirect: true
     locations:
       - name: /
         lines:
