@@ -57,7 +57,7 @@ listen [::]:{{ item.listen }};
 {% endif %}
 
 
-{% for k,v in item.iteritems() %}
+{% for k,v in item.items() %}
 {% if k.find('locations') == -1 and k != 'file_name' and k != 'listen' and k != 'ssl' and k != 'ipv4_only' %}
 {{ k }} {{ v }};
 {% endif %}
